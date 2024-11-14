@@ -5,6 +5,8 @@ using Unity.Mathematics;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.UI;
+using TMPro;
 
 
 // I am making Stacklands!!
@@ -13,10 +15,10 @@ namespace Cards
 {
     public class Card : MonoBehaviour
     {
-        public int2 Size { get; set; } = new int2(4, 7);
+        public int2 Size { get; set; } = new int2(20, 35);
         public string CardName { get; set; }
         public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
-        public GameObject CardPrefab; // Assign this in the Inspector //Change that
+        public GameObject CardObject; // Assign this in the Inspector //Change that
         public int Index { get; set; } = 0;
         public List<Card> CardStack { get; set; } = new List<Card>();// Card stack means this card and newly added all cards.
         public Card(string cardName)
@@ -25,15 +27,14 @@ namespace Cards
             this.CardStack.Add(this);
         }
 
-        public virtual GameObject createPhysicalCard()
+        public virtual void createPhysicalCard(GameObject cardObject)
         {
-            // Instantiate the physical card object in the game world
-            GameObject cardObject = Instantiate(CardPrefab);  // Use CardPrefab
-            // Optionally, set properties like position, rotation, or scale
+            this.CardObject = cardObject;
             cardObject.transform.position = this.Position; // Use Position
-                                                           // Optionally, add components or set attributes unique to this card
             cardObject.name = this.CardName; // Use CardName
-            return cardObject;
+            TextMeshProUGUI cardNameText = cardObject.GetComponentInChildren<TextMeshProUGUI>();
+            cardNameText.text = this.CardName;
+        
         }
         public void beDestroyed()
         {
@@ -121,9 +122,9 @@ namespace Cards
 
     public class FriendlyMob : Mob
     {
-        public Card[] Production { get; set; }
+        public string[] Production { get; set; }
 
-        public FriendlyMob(string cardName, int health, int damage, AttackType attackType, float speed, List<Card> deathOccurences, Card[] production) : base(cardName, health, damage, attackType, speed, deathOccurences)
+        public FriendlyMob(string cardName, int health, int damage, AttackType attackType, float speed, List<Card> deathOccurences, string[] production) : base(cardName, health, damage, attackType, speed, deathOccurences)
         {
 
             this.Production = production;
@@ -143,10 +144,10 @@ namespace Cards
         public Structure WorkLocation { get; set; }
         public bool IsVillagerNecessary { get; set; }
         public int BaseWorkRequired { get; set; }
-        public Card[] Result { get; set; }
+        public string[] Result { get; set; }
 
 
-        public Job(Resource[] targetResources, Structure workLocation, bool isVillagerNecessary, int baseWorkRequired, Card[] result)
+        public Job(Resource[] targetResources, Structure workLocation, bool isVillagerNecessary, int baseWorkRequired, string[] result)
         {
             this.TargetResources = targetResources;
             this.WorkLocation = workLocation;
@@ -213,10 +214,10 @@ namespace Cards
 
     public class NaturalStructure : Structure
     {
-        public Card[] Goods { get; set; }
+        public string[] Goods { get; set; }
         public int TimesProccessable { get; set; }
 
-        public NaturalStructure(string cardName, int price, int workRequiredEach, Card[] goods, int timesProccessable) : base(cardName, price, workRequiredEach)
+        public NaturalStructure(string cardName, int price, int workRequiredEach, string[] goods, int timesProccessable) : base(cardName, price, workRequiredEach)
         {
             this.Price = 0; // Initialize Price to 0
             this.Goods = goods;
@@ -226,9 +227,9 @@ namespace Cards
 
     public class AutomateStructure : Structure
     {
-        public Dictionary<Card, Card> InAndOutDictionary { get; set; }
+        public Dictionary<string, string> InAndOutDictionary { get; set; }
 
-        public AutomateStructure(string cardName, int price, int workRequiredEach, Dictionary<Card, Card> inAndOutDictionary) : base(cardName, price, workRequiredEach)
+        public AutomateStructure(string cardName, int price, int workRequiredEach, Dictionary<string, string> inAndOutDictionary) : base(cardName, price, workRequiredEach)
         {
             this.InAndOutDictionary = inAndOutDictionary;
         }
@@ -236,9 +237,9 @@ namespace Cards
 
     public class WorkPlaceStructure : Structure
     {
-        public Card Good { get; set; }
+        public string Good { get; set; }
 
-        public WorkPlaceStructure(string cardName, int price, int workRequiredEach, Card good) : base(cardName, price, workRequiredEach)
+        public WorkPlaceStructure(string cardName, int price, int workRequiredEach, string good) : base(cardName, price, workRequiredEach)
         {
             this.Good = good;
         }
@@ -247,9 +248,9 @@ namespace Cards
     public class HolderStructure : Structure
     {
         public int Capacity { get; set; }
-        public Card[] CanHold { get; set; }
+        public string[] CanHold { get; set; }
 
-        public HolderStructure(string cardName, int price, int workRequiredEach, int capacity, Card[] canHold) : base(cardName, price, workRequiredEach)
+        public HolderStructure(string cardName, int price, int workRequiredEach, int capacity, string[] canHold) : base(cardName, price, workRequiredEach)
         {
             this.Capacity = capacity;
             this.CanHold = canHold;
@@ -282,11 +283,11 @@ namespace Cards
     }
 
     public class Idea : Card{
-        public Dictionary<Card, int> Ingredients { get; set; }
+        public Dictionary<string, int> Ingredients { get; set; }
         public string Description { get; set; }
         public int HowManyCoins { get; set; }
 
-        public Idea(string cardName, Dictionary<Card, int> ingredients, string description, int howManyCoins) : base(cardName)
+        public Idea(string cardName, Dictionary<string, int> ingredients, string description, int howManyCoins) : base(cardName)
         {
             this.Ingredients = ingredients;
             this.Description = description;
@@ -296,11 +297,11 @@ namespace Cards
 
     public class Location : Card
     {
-        public List<Card> Items { get; set; }
+        public List<string> Items { get; set; }
         public List<Mob> Mobs { get; set; }
         public int DiscoveryWorkRequired { get; set; }
 
-        public Location(string cardName, List<Card> items, List<Mob> mobs, int discoveryWorkRequired) : base(cardName)
+        public Location(string cardName, List<string> items, List<Mob> mobs, int discoveryWorkRequired) : base(cardName)
         {
             this.Items = items;
             this.Mobs = mobs;

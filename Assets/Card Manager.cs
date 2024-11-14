@@ -2,42 +2,70 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Cards;
+using UnityEngine.AI;
+using UnityEngine.UI;
+using TMPro;
 
 public class CardManager : MonoBehaviour
 {
-    public Card cardPrefab; // Reference to the Card prefab
+    public GameObject cardPrefab; // Reference to the Card prefab
+    public Canvas uiCanvas; // Assign this in the Inspector
+
     // Start is called before the first frame update
     void Start()
     {
        CreateCards(); 
     }
     private void CreateCards()
-    {
-        
-                
+    {      
         List<Card> allOfTheCards = new List<Card>();
-        
-        /*
-        villager, brick, coin, corpse, cotton, fabric, gold ore, gold bar, ıron ore, ıron bar, wood, wool, stick, stone, sand, rope, poop, paper, apple, milk, berry, carrot, tomato, wheat, egg, rabbit, chicken, cow, ogre, rebbit, skeleton, goblin, graveyard, old village, forest, axe, pickaxe, hammer
-        */
         // Instantiate some of the cards in the stacklands game
         // A New World
-        allOfTheCards.Add(new Villager("Basic Human",15,2,Villager.AttackType.Melee,5));
-        allOfTheCards.Add(new Coin("Coin"));
-        allOfTheCards.Add(new Resource("Wood", 1));
-        allOfTheCards.Add(new NaturalStructure("Rock",0, 20, new Card[] {new Resource("Stone", 1)}, 1));
-        allOfTheCards.Add(new NaturalStructure("Berry Bush",0, 30, new Card[] {new Food("Berry", 2, true, 1, false, 0)}, 4));
+        allOfTheCards.Add(CreateACardFromName("Basic Human"));
+        allOfTheCards.Add(CreateACardFromName("Coin"));
+        allOfTheCards.Add(CreateACardFromName("Wood"));
+        allOfTheCards.Add(CreateACardFromName("Stone"));
+        allOfTheCards.Add(CreateACardFromName("Rock"));
+        allOfTheCards.Add(CreateACardFromName("Berry Bush"));
+        allOfTheCards.Add(CreateACardFromName("Berry"));
         // Humble Beginnings
-
-
 
         foreach (Card card in allOfTheCards)
         {
-            card.createPhysicalCard();
+            GameObject cardObject = Instantiate(cardPrefab, uiCanvas.transform); // Parent to canvas
+            card.createPhysicalCard(cardObject);
+        }
+    }
+    private Card CreateACardFromName(string cardName){
+
+        if (cardName.Equals("Basic Human")){
+            return new Villager("Basic Human",15,2,Villager.AttackType.Melee,5);
+        }
+        else if (cardName.Equals("Coin")){
+            return new Coin("Coin");
+        }
+        else if (cardName.Equals("Wood")){
+            return new Resource("Wood", 1);
+        }
+        else if (cardName.Equals("Stone")){
+            return new Resource("Stone", 1);
+        }
+        else if (cardName.Equals("Rock")){
+            return new NaturalStructure("Rock",0, 20, new string[] {"Stone"}, 1);
         }
 
-        
+        else if (cardName.Equals("Berry Bush")){
+            return new NaturalStructure("Berry Bush",0, 30, new string[] {"Berry"}, 4);
+        }
+        else if (cardName.Equals("Berry")){
+            return new Food("Berry", 2, true, 1, false, 0);
+        }
+        else {
+            return null;
+        }
+
     }
+
     /*
     allOfTheCards.Add(new Resource("Stone", 2));
         allOfTheCards.Add(new Resource("Iron Ore", 5));
