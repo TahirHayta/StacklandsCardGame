@@ -271,8 +271,7 @@ namespace Cards
         }
     }
 
-    public class Idea : Card
-    {
+    public class Idea : Card{
         public Dictionary<Card, int> Ingredients { get; set; }
         public string Description { get; set; }
         public int HowManyCoins { get; set; }
