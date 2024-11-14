@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -12,14 +13,16 @@ namespace Cards
 {
     public class Card : MonoBehaviour
     {
-        public int2 Size { get; set; } = new int2(30, 50);
+        public int2 Size { get; set; } = new int2(4, 7);
         public string CardName { get; set; }
         public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
         public GameObject CardPrefab; // Assign this in the Inspector //Change that
-
+        public int Index { get; set; } = 0;
+        public List<Card> CardStack { get; set; } = new List<Card>();// Card stack means this card and newly added all cards.
         public Card(string cardName)
         {
             this.CardName = cardName;
+            this.CardStack.Add(this);
         }
 
         public virtual GameObject createPhysicalCard()
@@ -36,7 +39,33 @@ namespace Cards
         {
             //TODO
         }
-    }
+        
+        public void addToStack(Card card) //New cards will be added upon this.CardStack. And their CardStack will be updated.
+        {
+            foreach (Card newComingCard in card.CardStack){
+                this.CardStack.Add(newComingCard);
+                newComingCard.Index = (this.CardStack.Count-1);
+                newComingCard.CardStack = this.CardStack;
+            }
+        }
+        public void leaveFromStack(Card card) // card and Cards below that card are leaving. Update this.CardStack and make a newStack for them.
+        {
+            int startIndex = this.CardStack.IndexOf(card);
+            List<Card> newStack = new List<Card>();
+            for (int i = startIndex; i < this.CardStack.Count; i++)
+                {
+                Card outGoingCard = this.CardStack[i];
+                newStack.Add(outGoingCard);                
+                outGoingCard.Index = newStack.Count-1;         
+                outGoingCard.CardStack = newStack;     
+                }
+            this.CardStack.RemoveRange(startIndex, this.CardStack.Count- startIndex);
+        }
+
+
+
+
+}
 
     public class Coin : Card
     {
@@ -132,30 +161,11 @@ namespace Cards
         public int Price { get; set; }
         public int QuantityOfSame { get; set; } = 1;
         public bool DoesIncludeDifferentCards { get; set; } = false;
-        public int Index { get; set; } = 0;
-        public List<Card> CardStack { get; set; } = new List<Card>();
 
         public Sellable(string cardName, int price) : base(cardName)
         {
             this.Price = price;
-            this.CardStack.Add(this);
         }
-        public void addToStack(Sellable sellable)
-        {
-            this.CardStack.Add(sellable);
-            sellable.Index = (this.Index + 1);
-            sellable.CardStack = (this.CardStack);
-
-        }
-        public void leaveFromStack(Sellable sellable)
-        {
-            this.CardStack.Remove(sellable);
-            sellable.Index = 0;
-            sellable.CardStack = (new List<Card>());
-        }
-
-
-
 
 
 
