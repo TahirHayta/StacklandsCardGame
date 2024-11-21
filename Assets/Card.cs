@@ -17,23 +17,34 @@ namespace Cards
     {
         public int2 Size { get; set; } = new int2(20, 35);
         public string CardName { get; set; }
+        public int CardID { get; set; } //For more efficiency, when checking cards, compare cardID
         public Vector3 Position { get; set; } = new Vector3(0, 0, 0);
         public GameObject CardObject; // Assign this in the Inspector //Change that
-        public int Index { get; set; } = 0;
+        public int Index { get; set; }
         public List<Card> CardStack { get; set; } = new List<Card>();// Card stack means this card and newly added all cards.
-        public Card(string cardName)
+        public Card(int cardID , string cardName)
         {
             this.CardName = cardName;
             this.CardStack.Add(this);
+            this.CardID = cardID;
         }
-
+        public override string ToString(){ //Rewrite ToString to show CardName
+            return CardName;}
+        public override bool Equals(object obj){ //   Rewrite Equals to compare names
+        if (obj is Card otherCard){
+            // Compare names
+            return this.CardName == otherCard.CardName;}
+        return false;}
+        public override int GetHashCode(){ //For equals function. Necessary somehow. 
+            return CardName.GetHashCode(); }
+        
         public virtual void createPhysicalCard(GameObject cardObject)
         {
             this.CardObject = cardObject;
             cardObject.transform.position = this.Position; // Use Position
             cardObject.name = this.CardName; // Use CardName
             TextMeshProUGUI cardNameText = cardObject.GetComponentInChildren<TextMeshProUGUI>();
-            cardNameText.text = this.CardName;
+            cardNameText.text = this.CardName; 
         
         }
         public void beDestroyed()
@@ -62,6 +73,12 @@ namespace Cards
                 }
             this.CardStack.RemoveRange(startIndex, this.CardStack.Count- startIndex);
         }
+        public void doesCombination(List<Card> CardStack ){
+            foreach (Card card in CardStack)
+            {
+                
+            }
+        }
 
 
 
@@ -71,7 +88,7 @@ namespace Cards
     public class Coin : Card
     {
         public int Quantity { get; set; } = 1;
-        public Coin(string cardName) : base(cardName)
+        public Coin(int cardID ,string cardName) : base(cardID,cardName)
         {
         }
     }
@@ -89,7 +106,7 @@ namespace Cards
             Mage
         }
 
-        public Alive(string cardName, int health, int damage, AttackType attackType) : base(cardName)
+        public Alive(int cardID ,string cardName, int health, int damage, AttackType attackType) : base(cardID,cardName)
         {
             this.Health = health;
             this.Damage = damage;
@@ -102,7 +119,7 @@ namespace Cards
         public int WorkCapacity { get; set; }
         public Job CurrentJob { get; set; }
 
-        public Villager(string cardName, int health, int damage, AttackType attackType, int workCapacity) : base(cardName, health, damage, attackType)
+        public Villager(int cardID ,string cardName, int health, int damage, AttackType attackType, int workCapacity) : base(cardID,cardName, health, damage, attackType)
         {
             this.WorkCapacity = workCapacity;
         }
@@ -113,7 +130,7 @@ namespace Cards
         public float Speed { get; set; }
         public List<Card> DeathOccurences { get; set; }
 
-        public Mob(string cardName, int health, int damage, AttackType attackType, float speed, List<Card> deathOccurences) : base(cardName, health, damage, attackType)
+        public Mob(int cardID ,string cardName, int health, int damage, AttackType attackType, float speed, List<Card> deathOccurences) : base(cardID,cardName, health, damage, attackType)
         {
             this.Speed = speed;
             this.DeathOccurences = deathOccurences;
@@ -124,7 +141,7 @@ namespace Cards
     {
         public string[] Production { get; set; }
 
-        public FriendlyMob(string cardName, int health, int damage, AttackType attackType, float speed, List<Card> deathOccurences, string[] production) : base(cardName, health, damage, attackType, speed, deathOccurences)
+        public FriendlyMob(int cardID ,string cardName, int health, int damage, AttackType attackType, float speed, List<Card> deathOccurences, string[] production) : base(cardID, cardName, health, damage, attackType, speed, deathOccurences)
         {
 
             this.Production = production;
@@ -133,7 +150,7 @@ namespace Cards
 
     public class UnfriendlyMob : Mob
     {
-        public UnfriendlyMob(string cardName, int health, int damage, AttackType attackType, float speed, List<Card> deathOccurences) : base(cardName, health, damage, attackType, speed, deathOccurences)
+        public UnfriendlyMob(int cardID ,string cardName, int health, int damage, AttackType attackType, float speed, List<Card> deathOccurences) : base(cardID, cardName, health, damage, attackType, speed, deathOccurences)
         {
         }
     }
@@ -163,7 +180,7 @@ namespace Cards
         public int QuantityOfSame { get; set; } = 1;
         public bool DoesIncludeDifferentCards { get; set; } = false;
 
-        public Sellable(string cardName, int price) : base(cardName)
+        public Sellable(int cardID ,string cardName, int price) : base(cardID,cardName)
         {
             this.Price = price;
         }
@@ -179,7 +196,7 @@ namespace Cards
         public bool IsPerishable { get; set; }
         public int ShelfLife { get; set; }
 
-        public Food(string cardName, int price, bool isConsumable, int hungerRestoration, bool isPerishable, int shelfLife) : base(cardName, price)
+        public Food(int cardID ,string cardName, int price, bool isConsumable, int hungerRestoration, bool isPerishable, int shelfLife) : base(cardID,cardName, price)
         {
             this.IsConsumable = isConsumable;
             this.HungerRestoration = hungerRestoration;
@@ -192,11 +209,11 @@ namespace Cards
     {
         public Card NextLevel { get; set; }
 
-        public Resource(string cardName, int price) : base(cardName, price)
+        public Resource(int cardID ,string cardName, int price) : base(cardID,cardName, price)
         {
         }
 
-        public Resource(string cardName, int price, Card nextLevel) : base(cardName, price)
+        public Resource(int cardID ,string cardName, int price, Card nextLevel) : base(cardID,cardName, price)
         {
             this.NextLevel = nextLevel;
         }
@@ -206,7 +223,7 @@ namespace Cards
     {
         public int WorkRequiredEach { get; set; }
 
-        public Structure(string cardName, int price, int workRequiredEach) : base(cardName, price)
+        public Structure(int cardID ,string cardName, int price, int workRequiredEach) : base(cardID,cardName, price)
         {
             this.WorkRequiredEach = workRequiredEach;
         }
@@ -217,7 +234,7 @@ namespace Cards
         public string[] Goods { get; set; }
         public int TimesProccessable { get; set; }
 
-        public NaturalStructure(string cardName, int price, int workRequiredEach, string[] goods, int timesProccessable) : base(cardName, price, workRequiredEach)
+        public NaturalStructure(int cardID ,string cardName, int price, int workRequiredEach, string[] goods, int timesProccessable) : base(cardID,cardName, price, workRequiredEach)
         {
             this.Price = 0; // Initialize Price to 0
             this.Goods = goods;
@@ -229,7 +246,7 @@ namespace Cards
     {
         public Dictionary<string, string> InAndOutDictionary { get; set; }
 
-        public AutomateStructure(string cardName, int price, int workRequiredEach, Dictionary<string, string> inAndOutDictionary) : base(cardName, price, workRequiredEach)
+        public AutomateStructure(int cardID ,string cardName, int price, int workRequiredEach, Dictionary<string, string> inAndOutDictionary) : base(cardID,cardName, price, workRequiredEach)
         {
             this.InAndOutDictionary = inAndOutDictionary;
         }
@@ -239,7 +256,7 @@ namespace Cards
     {
         public string Good { get; set; }
 
-        public WorkPlaceStructure(string cardName, int price, int workRequiredEach, string good) : base(cardName, price, workRequiredEach)
+        public WorkPlaceStructure(int cardID ,string cardName, int price, int workRequiredEach, string good) : base(cardID,cardName, price, workRequiredEach)
         {
             this.Good = good;
         }
@@ -250,7 +267,7 @@ namespace Cards
         public int Capacity { get; set; }
         public string[] CanHold { get; set; }
 
-        public HolderStructure(string cardName, int price, int workRequiredEach, int capacity, string[] canHold) : base(cardName, price, workRequiredEach)
+        public HolderStructure(int cardID ,string cardName, int price, int workRequiredEach, int capacity, string[] canHold) : base(cardID,cardName, price, workRequiredEach)
         {
             this.Capacity = capacity;
             this.CanHold = canHold;
@@ -273,7 +290,7 @@ namespace Cards
         public int DamageAddition { get; set; }
         public int Armor { get; set; }
 
-        public Equipment(string cardName, int price, EquipmentSlot slot, int durability, int damageAddition, int armor) : base(cardName, price)
+        public Equipment(int cardID ,string cardName, int price, EquipmentSlot slot, int durability, int damageAddition, int armor) : base(cardID,cardName, price)
         {
             this.Slot = slot;
             this.Durability = durability;
@@ -287,7 +304,7 @@ namespace Cards
         public string Description { get; set; }
         public int HowManyCoins { get; set; }
 
-        public Idea(string cardName, Dictionary<string, int> ingredients, string description, int howManyCoins) : base(cardName)
+        public Idea(int cardID ,string cardName, Dictionary<string, int> ingredients, string description, int howManyCoins) : base(cardID,cardName)
         {
             this.Ingredients = ingredients;
             this.Description = description;
@@ -301,7 +318,7 @@ namespace Cards
         public List<Mob> Mobs { get; set; }
         public int DiscoveryWorkRequired { get; set; }
 
-        public Location(string cardName, List<string> items, List<Mob> mobs, int discoveryWorkRequired) : base(cardName)
+        public Location(int cardID ,string cardName, List<string> items, List<Mob> mobs, int discoveryWorkRequired) : base(cardID,cardName)
         {
             this.Items = items;
             this.Mobs = mobs;

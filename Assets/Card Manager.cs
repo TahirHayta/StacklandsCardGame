@@ -5,11 +5,16 @@ using Cards;
 using UnityEngine.AI;
 using UnityEngine.UI;
 using TMPro;
+using System.Linq;
+
+namespace CardManagerAndNecessaryClasses{
 
 public class CardManager : MonoBehaviour
 {
-    public GameObject cardPrefab; // Reference to the Card prefab
-    public Canvas uiCanvas; // Assign this in the Inspector
+    public GameObject CardPrefab; // Reference to the Card prefab
+    public Canvas UICanvas; // Assign this in the Inspector
+
+    public LinkedList<Recipy> Recipies { get; set; } = {new Recipy({"Berry":1, "Soil":1}, "Berry Bush")};    
 
     // Start is called before the first frame update
     void Start()
@@ -28,46 +33,71 @@ public class CardManager : MonoBehaviour
         allOfTheCards.Add(CreateACardFromName("Rock"));
         allOfTheCards.Add(CreateACardFromName("Berry Bush"));
         allOfTheCards.Add(CreateACardFromName("Berry"));
+        allOfTheCards.Add(CreateACardFromName("Soil"));
+
         // Humble Beginnings
 
         foreach (Card card in allOfTheCards)
         {
-            GameObject cardObject = Instantiate(cardPrefab, uiCanvas.transform); // Parent to canvas
+            GameObject cardObject = Instantiate(CardPrefab, UICanvas.transform); // Parent to canvas
             card.createPhysicalCard(cardObject);
         }
     }
-    private Card CreateACardFromName(string cardName){
 
-        if (cardName.Equals("Basic Human")){
-            return new Villager("Basic Human",15,2,Villager.AttackType.Melee,5);
-        }
-        else if (cardName.Equals("Coin")){
-            return new Coin("Coin");
-        }
-        else if (cardName.Equals("Wood")){
-            return new Resource("Wood", 1);
-        }
-        else if (cardName.Equals("Stone")){
-            return new Resource("Stone", 1);
-        }
-        else if (cardName.Equals("Rock")){
-            return new NaturalStructure("Rock",0, 20, new string[] {"Stone"}, 1);
-        }
+    private static Card CreateACardFromName(string cardName){
+        switch (cardName)
+        {
+            case "Basic Human":return new Villager(CardNameToID("Basic Human"),"Basic Human",15,2,Villager.AttackType.Melee,5);
+            case "Coin":return new Coin(CardNameToID("Coin"),"Coin");
+            case "Wood":return new Resource(CardNameToID("Wood"),"Wood", 1);
+            case "Stone":return new Resource(CardNameToID("Stone"),"Stone", 1);
+            case "Rock":return new NaturalStructure(CardNameToID("Rock"),"Rock",0, 20, new string[] {"Stone"}, 1);
+            case "Berry Bush":return new NaturalStructure(CardNameToID("Berry Bush"),"Berry Bush",0, 30, new string[] {"Berry"}, 4);
+            case "Berry":return new Food(CardNameToID("Berry"),"Berry", 2, true, 1, false, 0);
+            case "Soil":return new Resource(CardNameToID("Soil"),"Soil" ,3);
+            default: return null;
+        //Contunie from 7
+    }}
 
-        else if (cardName.Equals("Berry Bush")){
-            return new NaturalStructure("Berry Bush",0, 30, new string[] {"Berry"}, 4);
+
+    // Helper function to convert card ID to name
+    public static string IDtoCardName(int cardID){
+        switch (cardID)
+        {
+            case 1: return "Coin";
+            case 2: return "Wood";
+            case 3: return "Stone";
+            case 4: return "Berry";
+            case 5: return "Rock";
+            case 6: return "Berry Bush";
+            case 7: return "Basic Human";
+            case 8: return "Soil";
+            default: return null;
         }
-        else if (cardName.Equals("Berry")){
-            return new Food("Berry", 2, true, 1, false, 0);
-        }
-        else {
-            return null;
+    }
+    
+
+
+    // Helper function to convert card name to ID (you'll need to implement this)
+    public static int CardNameToID(string cardName)
+    {
+        // Reverse lookup logic (you need to implement this based on your card data)
+        switch(cardName) {
+            case "Coin": return 1;
+            case "Wood": return 2;
+            case "Stone": return 3;
+            case "Berry": return 4;
+            case "Rock": return 5;  // Corrected ID for Rock
+            case "Berry Bush": return 6;
+            case "Basic Human": return 7;
+            case "Soil": return 8;
+            default: return null; // Return null for unknown names
         }
 
     }
 
+
     /*
-    allOfTheCards.Add(new Resource("Stone", 2));
         allOfTheCards.Add(new Resource("Iron Ore", 5));
         allOfTheCards.Add(new Resource("Iron Bar", 10, new Resource("Steel Bar", 20)));
         allOfTheCards.Add(new Resource("Gold Ore", 10));
@@ -91,4 +121,34 @@ public class CardManager : MonoBehaviour
     {
         
     }
+}
+
+public struct Recipy
+{
+    public int SumOfIDS { get; set; } = 0;// just to make search easy.
+    public Dictionary<int, int> IDandQuantity { get; set; } // Which  card (ID) and how many times it is used
+    public string ResultCardName { get; set; }
+    public string Explanation;
+
+    public Recipy(Dictionary<string, int> cardNameAndQuantity, string resultCardName)
+    {
+        this.ResultCardName = resultCardName;
+        this.IDandQuantity = new Dictionary<int, int>();  // Initialize
+        StringBuilder exp = new StringBuilder();
+
+        foreach (KeyValuePair<string, int> kvp in cardNameAndQuantity)
+        {
+            int cardID = CardNameToID(kvp.Key);
+            this.SumOfIDS+ = cardID;
+            this.IDandQuantity.Add(cardID.Value, kvp.Value);
+            exp.AppendFormat("{0} x {1}\n", kvp.Value, kvp.Key);
+            
+        }
+        exp.AppendFormat("===>> {0}", this.ResultCardName);
+        this.Explanation = exp.ToString();
+        }
+    public override string ToString() => this.Explanation;
+}
+
+
 }
